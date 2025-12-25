@@ -1,6 +1,6 @@
 # Mermaid Syntax Skill
 
-A Claude Code skill for generating error-free Mermaid diagrams. Prevents common syntax errors with special characters, reserved words, and escaping rules.
+A Claude Code skill for generating error-free Mermaid diagrams. Prevents common syntax errors with special characters, reserved words, and escaping rules. **Supports Mermaid v11 features.**
 
 ## Installation
 
@@ -12,8 +12,10 @@ git clone https://github.com/awesome-skills/mermaid-syntax-skill.git ~/.claude/s
 ## Features
 
 - **Critical Error Prevention** - Handles 90% of common Mermaid syntax errors
-- **Complete Syntax Reference** - Flowchart, Sequence, Class, and State diagrams
+- **Mermaid v11 Support** - Hand-drawn look, bidirectional arrows, new diagram types
+- **Complete Syntax Reference** - Flowchart, Sequence, Class, State, ER, Gantt, Git Graph, and more
 - **Working Examples** - Ready-to-use diagram patterns
+- **Validation Script** - Check diagrams for common errors before committing
 
 ## Common Errors This Skill Prevents
 
@@ -23,6 +25,9 @@ git clone https://github.com/awesome-skills/mermaid-syntax-skill.git ~/.claude/s
 | Reserved Word "end" | `A --> end` breaks diagram | Use `A --> End` or `A --> ["end"]` |
 | Node ID with o/x | `oNode` creates circle edge | Use descriptive names: `orderNode` |
 | Semicolon in Sequence | `A->>B: key;value` breaks | Use entity: `A->>B: key#59;value` |
+| Single % comment | `% comment` breaks | Use `%% comment` |
+| Subgraph with `<br/>` | `subgraph Title<br/>` breaks | Use `subgraph "Title<br/>"` |
+| stroke-dasharray comma | `stroke-dasharray: 5,5` breaks | Escape: `stroke-dasharray: 5\,5` |
 
 ## Skill Structure
 
@@ -30,12 +35,15 @@ git clone https://github.com/awesome-skills/mermaid-syntax-skill.git ~/.claude/s
 mermaid-syntax/
 ├── SKILL.md              # Core syntax rules (auto-loaded when triggered)
 ├── references/
-│   ├── flowchart-complete.md    # All node shapes, edges, subgraphs
+│   ├── flowchart-complete.md    # All 30+ node shapes, edges, subgraphs
 │   ├── sequence-complete.md     # Messages, activations, control flow
-│   └── class-state-complete.md  # Class/State diagram syntax
-└── examples/
-    ├── flowchart-examples.md    # 8 flowchart patterns
-    └── sequence-examples.md     # 10 sequence diagram patterns
+│   ├── class-state-complete.md  # Class/State/ER diagram syntax
+│   └── other-diagrams.md        # Gantt, Pie, Git Graph, Mindmap, Timeline
+├── examples/
+│   ├── flowchart-examples.md    # 8 flowchart patterns
+│   └── sequence-examples.md     # 10 sequence diagram patterns
+└── scripts/
+    └── validate-mermaid.sh      # Syntax validation helper
 ```
 
 ## Trigger Keywords
@@ -43,6 +51,32 @@ mermaid-syntax/
 The skill activates when you mention:
 - `mermaid`, `diagram`, `flowchart`
 - `sequence diagram`, `class diagram`, `state diagram`
+- `fix mermaid error`, `diagram not rendering`
+- `ER diagram`, `gantt chart`
+
+## Mermaid v11 Features
+
+### Hand-Drawn Look
+
+```mermaid
+%%{init: {"look": "handDrawn"}}%%
+flowchart LR
+    A[Sketchy] --> B[Style]
+```
+
+### Bidirectional Arrows
+
+```mermaid
+sequenceDiagram
+    A <<->> B: Bidirectional
+```
+
+### New Diagram Types
+- Packet Diagram
+- XY Chart
+- Block Diagram
+- Sankey Diagram
+- Architecture Diagram
 
 ## Quick Reference
 
@@ -65,6 +99,7 @@ flowchart LR
 | `-->>` | Dotted arrow |
 | `-x` | Cross end |
 | `-)` | Async (open arrow) |
+| `<<->>` | Bidirectional (v11) |
 
 ### Class Diagram Relationships
 
@@ -74,6 +109,26 @@ flowchart LR
 | `*--` | Composition |
 | `o--` | Aggregation |
 | `-->` | Association |
+
+## Validation
+
+Use the included validation script:
+
+```bash
+# Validate a file
+./scripts/validate-mermaid.sh diagram.md
+
+# Or pipe content
+echo "flowchart LR\n  A-->B" | ./scripts/validate-mermaid.sh
+```
+
+Or test at: https://mermaid.live/
+
+## Resources
+
+- [Mermaid Live Editor](https://mermaid.live/)
+- [Official Documentation](https://mermaid.js.org/intro/syntax-reference.html)
+- [GitHub Repository](https://github.com/mermaid-js/mermaid)
 
 ## License
 

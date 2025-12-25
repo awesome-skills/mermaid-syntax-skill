@@ -1,12 +1,14 @@
 ---
 name: mermaid-syntax
-description: This skill should be used when generating Mermaid diagrams, creating flowcharts, sequence diagrams, class diagrams, state diagrams, or when the user mentions "mermaid", "diagram", "flowchart", "sequence diagram". Prevents common syntax errors with special characters, reserved words, and escaping rules.
-version: 1.0.0
+description: This skill should be used when the user asks to "create a mermaid diagram", "fix mermaid error", "mermaid syntax error", "diagram not rendering", "flowchart not working", "sequence diagram broken", "escape special characters in mermaid", or mentions "mermaid", "flowchart", "sequence diagram", "class diagram", "state diagram", "ER diagram", "gantt chart". Prevents common syntax errors with special characters, reserved words, escaping rules, and provides v11 syntax support.
+version: 1.1.0
 ---
 
 # Mermaid Diagram Syntax Guide
 
-Comprehensive syntax reference for generating error-free Mermaid diagrams. This skill prevents common mistakes when creating flowcharts, sequence diagrams, class diagrams, and state diagrams.
+Comprehensive syntax reference for generating error-free Mermaid diagrams. Prevents common mistakes and supports Mermaid v11 features including flowcharts, sequence diagrams, class diagrams, state diagrams, ER diagrams, Gantt charts, and more.
+
+**Test diagrams at:** https://mermaid.live/
 
 ## Critical Rules (Prevent 90% of Errors)
 
@@ -55,6 +57,66 @@ In sequence diagrams, semicolons define line breaks. Use `#59;` for literal semi
 ```mermaid
 sequenceDiagram
     A->>B: Value#59; Key#59; Data
+```
+
+### 5. Comments Must Use %%
+
+Single `%` breaks diagrams. Always use `%%`:
+
+```mermaid
+flowchart LR
+    %% This is a valid comment
+    A --> B
+```
+
+### 6. Subgraph with HTML Tags
+
+Wrap subgraph titles containing `<br/>` in quotes:
+
+```mermaid
+flowchart TB
+    subgraph "Title with<br/>line break"
+        A --> B
+    end
+```
+
+### 7. Style Property Escaping
+
+Escape commas in `stroke-dasharray` with backslash:
+
+```mermaid
+flowchart LR
+    A --> B
+    linkStyle 0 stroke-dasharray: 5\,5
+```
+
+## Mermaid v11 New Features
+
+### Hand-Drawn Look
+
+```mermaid
+%%{init: {"look": "handDrawn"}}%%
+flowchart LR
+    A[Sketchy] --> B[Style]
+```
+
+### Bidirectional Arrows (Sequence)
+
+```mermaid
+sequenceDiagram
+    A <<->> B: Bidirectional
+    A <<-->> B: Bidirectional dotted
+```
+
+### Configuration Directive
+
+```mermaid
+%%{init: {
+    "theme": "dark",
+    "flowchart": {"curve": "linear"}
+}}%%
+flowchart LR
+    A --> B
 ```
 
 ## Diagram Type Quick Reference
@@ -314,6 +376,47 @@ A[Step 1: Initialize]
 A["Step 1: Initialize"]
 ```
 
+## Other Diagram Types (Quick Start)
+
+### ER Diagram
+
+```mermaid
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE-ITEM : contains
+```
+
+### Gantt Chart
+
+```mermaid
+gantt
+    title Project Timeline
+    dateFormat YYYY-MM-DD
+    section Phase 1
+        Task A :a1, 2024-01-01, 30d
+        Task B :after a1, 20d
+```
+
+### Pie Chart
+
+```mermaid
+pie title Distribution
+    "A" : 40
+    "B" : 30
+    "C" : 30
+```
+
+### Git Graph
+
+```mermaid
+gitGraph
+    commit
+    branch develop
+    commit
+    checkout main
+    merge develop
+```
+
 ## Validation Checklist
 
 Before finalizing any Mermaid diagram:
@@ -325,6 +428,9 @@ Before finalizing any Mermaid diagram:
 5. [ ] Nested quotes use single quotes or HTML entities
 6. [ ] Subgraph titles are quoted if containing special chars
 7. [ ] Diagram type declaration is correct (`flowchart`, not `flow-chart`)
+8. [ ] Comments use `%%` (not single `%`)
+9. [ ] `stroke-dasharray` commas escaped with `\,`
+10. [ ] Test at https://mermaid.live/ before committing
 
 ## Additional Resources
 
@@ -333,10 +439,21 @@ Before finalizing any Mermaid diagram:
 For detailed syntax of each diagram type:
 - **`references/flowchart-complete.md`** - All 30+ node shapes, edge styling, subgraph nesting
 - **`references/sequence-complete.md`** - All message types, boxes, breaks, critical sections
-- **`references/class-state-complete.md`** - Class annotations, state concurrency, notes
+- **`references/class-state-complete.md`** - Class annotations, state concurrency, ER diagrams, notes
+- **`references/other-diagrams.md`** - Gantt, Pie, Git Graph, Mindmap, Timeline
 
 ### Example Files
 
 Working examples in `examples/`:
 - **`examples/flowchart-examples.md`** - Common flowchart patterns
 - **`examples/sequence-examples.md`** - API flow, auth flow patterns
+
+### Scripts
+
+- **`scripts/validate-mermaid.sh`** - Basic syntax validation helper
+
+### External Resources
+
+- **Live Editor:** https://mermaid.live/ - Test and debug diagrams
+- **Official Docs:** https://mermaid.js.org/intro/syntax-reference.html
+- **GitHub:** https://github.com/mermaid-js/mermaid
