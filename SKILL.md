@@ -1,7 +1,7 @@
 ---
 name: mermaid-syntax
 description: This skill should be used when the user asks to "create a mermaid diagram", "fix mermaid error", "mermaid syntax error", "diagram not rendering", "flowchart not working", "sequence diagram broken", "escape special characters in mermaid", or mentions "mermaid", "flowchart", "sequence diagram", "class diagram", "state diagram", "ER diagram", "gantt chart". Prevents common syntax errors with special characters, reserved words, escaping rules, and provides v11 syntax support.
-version: 1.4.0
+version: 1.5.0
 ---
 
 # Mermaid Diagram Syntax Guide
@@ -221,6 +221,51 @@ flowchart LR
 ```
 
 **Workaround:** These must be set via `mermaid.initialize()` in JavaScript, not in diagram config.
+
+### 16. linkStyle Hex Color as Last Attribute Bug
+
+Hex color as the LAST attribute in linkStyle causes parsing error:
+
+```mermaid
+flowchart LR
+    A --> B
+    %% BAD: hex color as last attribute
+    %% linkStyle 0 stroke-width:4px,stroke:#FF69B4
+
+    %% GOOD: hex color NOT last, or use color name
+    linkStyle 0 stroke:#FF69B4,stroke-width:4px
+    %% OR: linkStyle 0 stroke-width:4px,stroke:hotpink
+```
+
+**Workaround:** Put hex color before other attributes, or use CSS color names.
+
+### 17. Class Diagram Namespace Limitations
+
+Relationships and notes MUST be defined OUTSIDE namespace blocks:
+
+```mermaid
+classDiagram
+    namespace MyPackage {
+        class ClassA
+        class ClassB
+    }
+    %% Relationships OUTSIDE namespace block
+    ClassA --> ClassB
+    note for ClassA "This note is outside namespace"
+```
+
+**Limitation:** Nested namespaces not supported. Use flat structure.
+
+### 18. Architecture Diagram Label Characters
+
+Architecture node labels only support `[a-zA-Z0-9_ ]`. Hyphens and special chars break:
+
+```mermaid
+architecture-beta
+    %% BAD: service db[Cloud-Name]  (hyphen breaks)
+    %% GOOD: use underscore or spaces
+    service db(database)[Cloud_Name]
+```
 
 ## Mermaid v11 New Features
 
@@ -569,7 +614,10 @@ Before finalizing any Mermaid diagram:
 14. [ ] If using `---` (arrowless), verify Mermaid v11.5+ or use workaround
 15. [ ] Underscores in labels may render as italic in v11 (use quotes)
 16. [ ] `maxTextSize`/`maxEdges` can't be set in frontmatter (secure settings)
-17. [ ] Test at https://mermaid.live/ before committing
+17. [ ] linkStyle: hex color NOT as last attribute (or use color names)
+18. [ ] classDiagram: relationships and notes OUTSIDE namespace blocks
+19. [ ] architecture-beta: labels use only `[a-zA-Z0-9_ ]`, no hyphens
+20. [ ] Test at https://mermaid.live/ before committing
 
 ## Additional Resources
 
