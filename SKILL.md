@@ -1,7 +1,7 @@
 ---
 name: mermaid-syntax
 description: This skill should be used when the user asks to "create a mermaid diagram", "fix mermaid error", "mermaid syntax error", "diagram not rendering", "flowchart not working", "sequence diagram broken", "escape special characters in mermaid", or mentions "mermaid", "flowchart", "sequence diagram", "class diagram", "state diagram", "ER diagram", "gantt chart". Prevents common syntax errors with special characters, reserved words, escaping rules, and provides v11 syntax support.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # Mermaid Diagram Syntax Guide
@@ -25,18 +25,23 @@ flowchart LR
 
 **Characters requiring quotes:** `( ) [ ] { } / \ : ; # @ ! ? < > " '`
 
-### 2. Reserved Word "end"
+### 2. Reserved Words (Not Just "end"!)
 
-The word "end" breaks diagrams. Solutions:
+Multiple reserved words break diagrams. Use quoted labels with safe IDs:
 
 ```mermaid
 flowchart LR
-    A["Start"] --> B["End"]         %% Quoted
-    C[Start] --> D{{End}}           %% Wrapped in shape brackets
-    E[Start] --> F(End)             %% Wrapped in parentheses
+    node1["end"]           %% Safe: quoted with different ID
+    node2["default"]       %% Safe: "default" is also reserved
+    node3["End"]           %% Safe: capitalized
 ```
 
-**Never use:** `A[end]` or `A --> end`
+**All reserved words (use quoted labels):**
+- `end`, `default`
+- `style`, `linkStyle`, `classDef`, `class`
+- `call`, `href`, `click`, `interpolate`
+
+**Pattern:** `safeId["reserved word text"]` instead of `reserved[text]`
 
 ### 3. Node ID Starting Characters
 
@@ -89,6 +94,45 @@ flowchart LR
     A --> B
     linkStyle 0 stroke-dasharray: 5\,5
 ```
+
+### 8. Frontmatter Must Be First Line
+
+The `---` for frontmatter MUST be the only content on line 1:
+
+```mermaid
+---
+config:
+  theme: forest
+---
+flowchart LR
+    A --> B
+```
+
+**Wrong:** Any whitespace or content before `---` breaks the diagram.
+
+### 9. Mindmap `<` Character Bug
+
+In mindmaps, `<` renders as `&lt;`. Use words instead:
+
+```mermaid
+mindmap
+    root((Comparison))
+        Less than 10    %% Instead of "< 10"
+        Greater than 5  %% Instead of "> 5"
+```
+
+### 10. Class Diagram Colon Limitations
+
+Colons in class member types are tricky. Use return type syntax:
+
+```mermaid
+classDiagram
+    class MyClass {
+        +getData() Map~String, Object~
+    }
+```
+
+**Note:** Complex generic types with colons may not render correctly.
 
 ## Mermaid v11 New Features
 
@@ -422,15 +466,17 @@ gitGraph
 Before finalizing any Mermaid diagram:
 
 1. [ ] All text with special characters is quoted
-2. [ ] No bare "end" word (quoted or wrapped)
+2. [ ] No reserved words as node IDs (`end`, `default`, `style`, `class`, etc.)
 3. [ ] No node IDs starting with single `o` or `x`
 4. [ ] Semicolons in sequence messages use `#59;`
 5. [ ] Nested quotes use single quotes or HTML entities
-6. [ ] Subgraph titles are quoted if containing special chars
+6. [ ] Subgraph titles are quoted if containing `<br/>` or special chars
 7. [ ] Diagram type declaration is correct (`flowchart`, not `flow-chart`)
 8. [ ] Comments use `%%` (not single `%`)
 9. [ ] `stroke-dasharray` commas escaped with `\,`
-10. [ ] Test at https://mermaid.live/ before committing
+10. [ ] Frontmatter `---` is on the very first line (no whitespace before)
+11. [ ] Mindmaps avoid `<` character (use words)
+12. [ ] Test at https://mermaid.live/ before committing
 
 ## Additional Resources
 
