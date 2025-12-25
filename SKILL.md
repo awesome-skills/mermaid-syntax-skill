@@ -1,7 +1,7 @@
 ---
 name: mermaid-syntax
 description: This skill should be used when the user asks to "create a mermaid diagram", "fix mermaid error", "mermaid syntax error", "diagram not rendering", "flowchart not working", "sequence diagram broken", "escape special characters in mermaid", or mentions "mermaid", "flowchart", "sequence diagram", "class diagram", "state diagram", "ER diagram", "gantt chart". Prevents common syntax errors with special characters, reserved words, escaping rules, and provides v11 syntax support.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # Mermaid Diagram Syntax Guide
@@ -9,6 +9,8 @@ version: 1.2.0
 Comprehensive syntax reference for generating error-free Mermaid diagrams. Prevents common mistakes and supports Mermaid v11 features including flowcharts, sequence diagrams, class diagrams, state diagrams, ER diagrams, Gantt charts, and more.
 
 **Test diagrams at:** https://mermaid.live/
+
+**Prefer `flowchart` over `graph`:** Both work, but `flowchart` is the modern syntax with better feature support.
 
 ## Critical Rules (Prevent 90% of Errors)
 
@@ -133,6 +135,46 @@ classDiagram
 ```
 
 **Note:** Complex generic types with colons may not render correctly.
+
+### 11. Nested Subgraph Linking Bug
+
+Linking to both parent AND nested subgraph causes syntax error:
+
+```mermaid
+flowchart LR
+    %% BAD: linking to both system AND sub-system breaks
+    %% A --> system
+    %% B --> sub-system
+
+    %% GOOD: link to nodes inside, not subgraph itself
+    A --> service1
+    B --> service2
+
+    subgraph system
+        subgraph sub-system
+            service1
+            service2
+        end
+    end
+```
+
+**Workaround:** Link to nodes inside subgraphs, not the subgraph ID itself.
+
+### 12. Subgraph Direction Inheritance
+
+If subgraph nodes link to outside, direction is **ignored** (inherits parent):
+
+```mermaid
+flowchart LR
+    A --> B
+    subgraph sub [My Subgraph]
+        direction TB  %% Ignored if C links outside!
+        C --> D
+    end
+    B --> C  %% This external link forces LR direction
+```
+
+**Rule:** Subgraph direction only works if all nodes stay internal.
 
 ## Mermaid v11 New Features
 
@@ -476,7 +518,9 @@ Before finalizing any Mermaid diagram:
 9. [ ] `stroke-dasharray` commas escaped with `\,`
 10. [ ] Frontmatter `---` is on the very first line (no whitespace before)
 11. [ ] Mindmaps avoid `<` character (use words)
-12. [ ] Test at https://mermaid.live/ before committing
+12. [ ] No links to both parent and nested subgraphs (link to nodes inside instead)
+13. [ ] Subgraph direction only reliable if all nodes stay internal
+14. [ ] Test at https://mermaid.live/ before committing
 
 ## Additional Resources
 
