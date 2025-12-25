@@ -1,7 +1,7 @@
 ---
 name: mermaid-syntax
 description: This skill should be used when the user asks to "create a mermaid diagram", "fix mermaid error", "mermaid syntax error", "diagram not rendering", "flowchart not working", "sequence diagram broken", "escape special characters in mermaid", or mentions "mermaid", "flowchart", "sequence diagram", "class diagram", "state diagram", "ER diagram", "gantt chart". Prevents common syntax errors with special characters, reserved words, escaping rules, and provides v11 syntax support.
-version: 1.3.0
+version: 1.4.0
 ---
 
 # Mermaid Diagram Syntax Guide
@@ -175,6 +175,52 @@ flowchart LR
 ```
 
 **Rule:** Subgraph direction only works if all nodes stay internal.
+
+### 13. v11 Arrowless Edges Bug (v11.0-11.4)
+
+In Mermaid v11.0 to v11.4.x, the `---` (line without arrow) syntax is broken and shows arrows:
+
+```mermaid
+flowchart LR
+    %% BROKEN in v11.0-11.4: shows arrow instead of line
+    A --- B
+
+    %% Workaround: use explicit arrow and style
+    C --> D
+    linkStyle 0 stroke:#333,stroke-width:2px
+```
+
+**Fix:** Upgrade to Mermaid v11.5.0 or later.
+
+### 14. v11 Markdown-by-Default Breaking Change
+
+In v11, ALL node labels render as Markdown by default (breaking change from v10):
+
+```mermaid
+flowchart LR
+    %% v10: plain text, v11: renders as Markdown
+    A[**bold** and _italic_]
+
+    %% Problem: underscores in text become italic
+    B["file_name_here"]  %% Use quotes to prevent issues
+```
+
+**Note:** Only bold (`**`) and italic (`_` or `*`) are supported. Inline code with backticks may not work.
+
+### 15. Configuration Limits (Secure Settings)
+
+`maxTextSize` (default: 50,000 chars) and `maxEdges` (default: 500) are **secure settings** that CANNOT be set via frontmatter:
+
+```mermaid
+---
+config:
+  maxTextSize: 100000  %% IGNORED! Secure setting
+---
+flowchart LR
+    A --> B
+```
+
+**Workaround:** These must be set via `mermaid.initialize()` in JavaScript, not in diagram config.
 
 ## Mermaid v11 New Features
 
@@ -520,7 +566,10 @@ Before finalizing any Mermaid diagram:
 11. [ ] Mindmaps avoid `<` character (use words)
 12. [ ] No links to both parent and nested subgraphs (link to nodes inside instead)
 13. [ ] Subgraph direction only reliable if all nodes stay internal
-14. [ ] Test at https://mermaid.live/ before committing
+14. [ ] If using `---` (arrowless), verify Mermaid v11.5+ or use workaround
+15. [ ] Underscores in labels may render as italic in v11 (use quotes)
+16. [ ] `maxTextSize`/`maxEdges` can't be set in frontmatter (secure settings)
+17. [ ] Test at https://mermaid.live/ before committing
 
 ## Additional Resources
 
